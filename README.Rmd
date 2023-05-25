@@ -1,0 +1,63 @@
+---
+output: rmarkdown::html_vignette
+---
+
+
+## Overview
+
+The Elja package allows to perform Environment-Wide Association Studies in a 
+simplified way and to produce results in the form of tables and graphs.
+
+The Elja package provides two types of outputs for the results. 
+
+First, a data frame including for each tested variable : 
+
+* The value of the estimator (odd ratio or coefficients), the 95% Confidence 
+Interval and the associated p-value 
+* The number of observations taken into account in the model
+* The Akaike Information Criterion of the model
+
+In addition, two types of Manhattan plot can also be displayed, both with a 
+visual representation of the alpha threshold at 0.05 and the corrected alpha 
+threshold according to the Bonferroni method (3) and the Benjamini-Hochberg 
+False Discovery Rate (FDR) method (4) :
+
+* A Manhattan plot representing all the variables of the EWAS analysis
+* A Manhattan plot representing only the significant results (p<0.05).
+
+
+
+### Installation
+
+You can install this package from CRAN or from GitHub.
+
+```{r, eval = FALSE}
+
+install.packages("Elja")
+install_github("EHMarwan/Elja")
+
+```
+
+
+## Usage
+
+```{r, message = FALSE}
+
+library(Elja)
+
+ELJAglm(var, var_adjust = NULL, family = binomial(link = "logit"), data, 
+        manplot = TRUE, nbvalmanplot = 100, Bonferroni = FALSE, FDR = FALSE,
+        manplotsign = FALSE)
+
+ELJAlinear(var, var_adjust = NULL, data, manplot = TRUE, nbvalmanplot = 100, 
+           Bonferroni = FALSE, FDR = FALSE, manplotsign = FALSE)
+
+ELJAlogistic(var, var_adjust = NULL, data, manplot = TRUE, nbvalmanplot = 100, 
+             Bonferroni = FALSE, FDR = FALSE, manplotsign = FALSE)
+
+```
+
+## Help
+
+If you encounter a bug or have any question, please submit an issue with a 
+reproducible example to [GitHub](https://github.com/EHMarwan/Elja/issues). 

@@ -1,0 +1,26 @@
+Package: Elja
+Type: Package
+Title: Linear, logistic and generalized linear models regressions for the EnvWAS/EWAS approach
+Version: 1.0.0
+Authors@R: c(
+    person("Marwan", "El Homsi", email = "marwan.el-homsi@inserm.fr", role = c("aut", "cre", "cph"),
+    comment = c(ORCID = "0000-0002-5782-6757")), 
+    person("Isabella", "Annesi-Maesano", email = "isabella.annesi-maesano@inserm.fr", role = c("ths","fnd"),
+    comment = c(ORCID = "0000-0002-6340-9300"))
+    )
+Maintainer: Marwan El Homsi <marwan.el-homsi@inserm.fr>
+Description: The Elja package is a tool for Environment-Wide Association
+    Studies (EnvWAS / EWAS) which are repeated analysis. It includes three 
+    functions. One function for linear regression, a second for logistic
+    regression and a last one for generalized linear models.
+Depends: R (>= 4.2)
+Imports: 
+    stats, devtools, dplyr, ggplot2, MASS
+Suggests: knitr, rmarkdown, mlbench
+License: GPL (>= 3) + file LICENSE
+URL: https://github.com/EHMarwan/Elja
+BugReports: https://github.com/EHMarwan/Elja/issues
+VignetteBuilder: knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

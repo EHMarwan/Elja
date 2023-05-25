@@ -1,0 +1,152 @@
+---
+title: "Introduction to the Elja package"
+author: "Marwan EL HOMSI"
+output: rmarkdown::html_vignette 
+description: >
+  To get started with the Elja package, take a look at the following 
+  presentation.
+  The purpose of this vignette is to show how to use the Elja package.
+vignette: >
+  %\VignetteIndexEntry{Introduction to the Elja package}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, message=FALSE}
+library(Elja)
+```
+
+```{r, include = F}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Environment-Wide Association Studies (EWAS) are the study of the association 
+between a health event and several exposures one after the other. With this 
+package, it is possible to carry out an EWAS analysis in the simplest way and
+to display easily interpretable results in the output.
+
+To do this, you must first define several points: 
+
+* Make your dataset prepared
+
+* Determine which health event you want to study
+
+* Launch the program
+
+The Elja package works step by step to perform an EWAS analysis:
+
+* It structures the dataset you have provided
+
+* It runs multiple models on all the exposures according to the type of model 
+chosen for the type of outcome (continuous, binary categorical etc.)
+
+* It results in a data frame including for each tested exposure (and all 
+associated modalities): the value of the estimator (odd ratio or coefficients) 
+as well as its 95% confidence interval and the associated p-value and the 
+number of values taken into account in the model and the AIC of the model.
+
+* It can also display two types of Manhattan plot both with visual indicator 
+of the alpha threshold at 0.05 and of the alpha threshold corrected according 
+to the Bonferroni method and the False Discovery Rate (FDR) of 
+Benjamini-Hochberg. The first one, representing all the variables of the EWAS 
+analysis. The second one, only for the significant values.
+
+This document introduces the basic use of this package in an EWAS analysis.
+
+
+## Data: PimaIndiansDiabetes
+
+In order to show in a simple way the use of the Elja package, we will use the 
+PIMA dataset. This dataset is present in the package mlbench 
+(https://mlbench.github.io/).
+
+```{r}
+library(mlbench)
+data(PimaIndiansDiabetes)
+head(PimaIndiansDiabetes)
+```
+
+This dataset containing a health event (diabetes) will allow us to to 
+illustrate the functioning of the Elja package. 
+
+## Preparation of the data set
+
+Before performing the function, we have to make sure that the dataset is well 
+structured.
+
+To do so, we have to check 2 elements:
+
+* The health event (outcome) must be in the same dataframe as all the 
+exposures: this will avoid making a model where we will include other outcomes.
+  
+* The variables must be classified in the right way: for this, use 'str()'.
+
+
+```{r}
+
+str(PimaIndiansDiabetes)
+
+```
+
+Diabetes, which is our target health event, stands alone with exposures.
+In addition, the variables all have the correct class associated.
+
+
+### Determine the type of model you want to use
+
+According to the class of the outcome, one model will be preferred to another. It is therefore necessary to choose the right model for the type of variable chosen as the health event.
+
+We have seen previously that our health event is binary categorical: Diabetes (Yes/No).
+
+```{r}
+str(PimaIndiansDiabetes$diabetes)
+```
+
+
+We can therefore use a logistic regression model.
+
+
+### Use of the ELJAlogistic function
+
+The approach for the logistic regression is similar for the models linear 
+models with ELJAlinear function and for Generalized Linear Models with ELJAglm
+function.
+
+The dataset being prepared and the type of model chosen, we can proceed to the
+analysis.
+
+To do so, the following information are needed:
+
+* var: Outcome / health event; it must be categorical for a logistic 
+regression model
+
+* data: Dataframe that contains the outcome and all the exposures to be tested
+
+Other information can be added to the output of the function:
+
+* manplot: Indicates if it is desired to display a Manhattan plot of the 
+results in the output of the function
+
+* nbvalmanplot: Indicates the number of values to display in the Manhattan plot 
+(in order not to overload the graphs)
+
+* Bonferroni: Indicates if we want to display the Bonferroni threshold on the 
+Manhattan plot
+
+* FDR : Indicates if you want to display the False Discovery Rate threshold 
+according to the Benjamini-Hochberg method on the Manhattan plot
+
+* manplotsign : Indicates if you want to display a Manhattan plot containing 
+only significant only the significant values with a p-value > 0.05.
+
+```{r , fig.height = 8, fig.width = 6, fig.align = "center",message = FALSE}
+
+ELJAlogistic(var = 'diabetes',data = PimaIndiansDiabetes,manplot = T,Bonferroni = T,FDR = T, 
+             nbvalmanplot = 30, manplotsign = F)
+results
+```
+
+We observe a Manhattan plot showing the results of the EWAS analysis and a 
+dataframe showing the more detailed results.
+
+
