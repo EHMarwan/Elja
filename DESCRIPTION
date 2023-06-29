@@ -1,6 +1,6 @@
 Package: Elja
 Type: Package
-Title: Linear, logistic and generalized linear models regressions for the EnvWAS/EWAS approach
+Title: Linear, Logistic and Generalized Linear Models Regressions for the EnvWAS/EWAS Approach
 Version: 1.0.0
 Authors@R: c(
     person("Marwan", "El Homsi", email = "marwan.el-homsi@inserm.fr", role = c("aut", "cre", "cph"),
@@ -19,7 +19,7 @@ Depends: R (>= 4.3)
 Imports: 
     stats, devtools, dplyr, ggplot2, MASS
 Suggests: knitr, rmarkdown, mlbench
-License: GPL (>= 3) + file LICENSE
+License: GPL (>= 3)
 URL: https://github.com/EHMarwan/Elja
 BugReports: https://github.com/EHMarwan/Elja/issues
 VignetteBuilder: knitr
