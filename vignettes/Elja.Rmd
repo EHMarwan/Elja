@@ -94,9 +94,12 @@ In addition, the variables all have the correct class associated.
 
 ### Determine the type of model you want to use
 
-According to the class of the outcome, one model will be preferred to another. It is therefore necessary to choose the right model for the type of variable chosen as the health event.
+According to the class of the outcome, one model will be preferred to another. 
+It is therefore necessary to choose the right model for the type of variable 
+chosen as the health event.
 
-We have seen previously that our health event is binary categorical: Diabetes (Yes/No).
+We have seen previously that our health event is binary categorical: 
+Diabetes (Yes/No).
 
 ```{r}
 str(PimaIndiansDiabetes$diabetes)
@@ -139,14 +142,30 @@ according to the Benjamini-Hochberg method on the Manhattan plot
 * manplotsign : Indicates if you want to display a Manhattan plot containing 
 only significant only the significant values with a p-value > 0.05.
 
-```{r , fig.height = 8, fig.width = 6, fig.align = "center",message = FALSE}
+```{r , fig.height = 5, fig.width = 8, fig.align = "center",message = FALSE}
 
-ELJAlogistic(var = 'diabetes',data = PimaIndiansDiabetes,manplot = T,Bonferroni = T,FDR = T, 
-             nbvalmanplot = 30, manplotsign = F)
+ELJAlogistic(var = 'diabetes',data = PimaIndiansDiabetes,manplot = TRUE,
+             Bonferroni = TRUE,FDR = TRUE, nbvalmanplot = 30, manplotsign = FALSE)
 results
+
 ```
 
 We observe a Manhattan plot showing the results of the EWAS analysis and a 
 dataframe showing the more detailed results.
+
+
+### References
+
+* Dunn OJ. Multiple Comparisons Among Means. Journal of the American 
+Statistical Association. 1961;56(293):52‑64.
+* Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical 
+and Powerful Approach to Multiple Testing. Journal of the Royal Statistical 
+Society: Series B (Methodological). 1995;57(1):289‑300.
+* MLBench · Distributed Machine Learning Benchmark. Available from: https://mlbench.github.io/
+* Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP
+Learning Algorithm to Forecast the Onset of Diabetes Mellitus. Proc Annu Symp
+Comput Appl Med Care. 1988 Nov 9;261–5. 
+
+
 
 

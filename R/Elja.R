@@ -4,7 +4,7 @@ utils::globalVariables(c("odd_ratio", "coefficients"))
 #' Linear regression for EnvWAS/EWAS analysis
 #'
 #' @description
-#' A tool for Environment-Wide Association Studies (EnvWAS / EWAS) which are repeated analysis. This function is espacially for linear regressions and allows the addition of adjustment variables.
+#' A tool for Environment-Wide Association Studies (EnvWAS / EWAS) namely repeated analyses allowing to estimate the relationships between several environmental factors and a health events. This function   is especially for linear regressions and allows the addition of adjustment variables.
 #'
 #'
 #' @param var A categorical and binary variable. It is generally your outcome.
@@ -25,37 +25,31 @@ utils::globalVariables(c("odd_ratio", "coefficients"))
 #' @export
 #'
 #' @examples
-#' ### Creating a dataframe with random variables
+#' ### Loading the PIMA dataset contained in the mlbench package
+#'
+#' library(mlbench)
+#' data(PimaIndiansDiabetes)
+#'
+#' ### Using ELJAlinear to perform EWAS analysis
+#'
+#' ELJAlinear(var = 'pregnant',data = PimaIndiansDiabetes,manplot = TRUE,
+#' Bonferroni = TRUE,FDR = TRUE, nbvalmanplot = 30, manplotsign = FALSE)
+#' results
 #'
 #'
-#'exposure1 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#'exposure2 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#'exposure3 <- as.factor(sample(c("Exposed", "Not exposed"), size = 400, replace = TRUE))
-#'exposure4 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#'exposure5 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#'exposure6 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#'exposure7 <- as.numeric(sample(0:400, size = 400, rep = TRUE))
-#'exposure8 <- as.numeric(sample(0:400, size = 400, rep = TRUE))
-#'exposure9 <- as.numeric(sample(0:0.1, size = 400, rep = TRUE))
-#'outcome <- as.numeric(sample(0:100, size = 400, rep = TRUE))
-#'
-#'data <- data.frame(exposure1,exposure2,exposure3,exposure4,exposure5,
-#'                   exposure6,exposure7,exposure8,exposure9, outcome)
-#'
-#'
-#'### Launch of the EnvWAS analysis
-#'
-#'ELJAlinear(var = 'outcome',data = data, var_adjust = c('exposure5'))
 #'
 #'@references
-#'1. Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
-#'2. Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
+#' Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' MLBench · Distributed Machine Learning Benchmark. Available from: https://mlbench.github.io/
+#' Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP Learning Algorithm to Forecast the Onset of Diabetes Mellitus. Proc Annu Symp Comput Appl Med Care. 1988 Nov 9;261–5.
+#'
 #'
 ELJAlinear <- function(var, var_adjust = NULL, data,
                       manplot = TRUE, nbvalmanplot = 100, Bonferroni = FALSE, FDR = FALSE, manplotsign = FALSE) {
 
 
-  # Definition de y et x ( x = variable explicative dans la boucle + variable d'ajustements fixe s'il y en a)
+  # Definition of y and x ( x = explanatory variable in the loop + fixed adjustment variable if any and y = health event)
   y <- data[, var]
 
   if (!is.null(var_adjust)) {
@@ -70,7 +64,7 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
 
   n <- length(x)
 
-  # Analyses de regressions pour chaque variable explicative
+  # Regression analyses for each explanatory variable
 
   x_cols <- colnames(x)
   lm_results <- list()
@@ -78,14 +72,14 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
 
   for (col in x_cols) {
     if(col %in% var_adjust) {
-      next # passer à la variable explicative suivante si elle fait partie des variables d'ajustement
+      next # Move on to the next explanatory variable if it is one of the adjustment variables
     }
     fit <- lm(as.formula(paste0(var, " ~ ", x_formula, col)), data = data)
     summary_fit <- summary(fit)
-    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclure l'intercept
+    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclude the intercept value
 
     for (name in coef_names) {
-      level <- gsub("x\\[.*\\]", " ", name) # Extraire la modalite de la variable explicative
+      level <- gsub("x\\[.*\\]", " ", name) # Extract the explanatory variable modality
       coeff <- summary_fit$coefficients[name, 1]
       ci <- suppressMessages(confint(fit, parm = name, level = 0.95))
       p_value <- summary_fit$coefficients[name, 4]
@@ -104,26 +98,27 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
     }
   }
 
-  # Assemblage des resultats dans un dataframe unique
+  # Assembling results in a single dataframe
   results <- do.call(rbind, lm_results)
   results$variable_level <- rownames(results)
   results$variable <- NULL
 
 
 
-  # Suppressions des Betas associes aux variables d'ajustement
+  # Deletion of coefficients associated with adjustment variables
+
   if (!is.null(var_adjust)) {
     results <- results[!grepl(paste(var_adjust, collapse="|"), results$variable_level),]
     rownames(results) <- results$level
   }
 
-  # Stockage du tableau des resultats
+  # Storing the results table
   results$variable_level <- NULL
   results <<- results
 
   nbvar <- as.numeric(length(results$p_value))
 
-  # Calcul du FDR
+  # FDR calculation
 
   results_test <- results %>% arrange(p_value) %>% mutate(ligne = row_number())
 
@@ -133,27 +128,24 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
 
   FDRcalc <- results_test %>% dplyr::filter(test == TRUE) %>% slice_tail(n = 1) %>% select(q) %>% as.numeric()
 
-  # Creation du Manhattan Plot
+  # Creation of the Manhattan Plot
+
   if (manplot == TRUE) {
 
-    # Creer un nouveau tableau de resultats avec autant de multiples de nbvalmanplot
+    # Creation of as many Manhattan plots as multiples of nbvalmanplot
     n_new <- ceiling(nrow(results) / nbvalmanplot) * nbvalmanplot
     results_new <- results[1:n_new, ]
 
-    # Ajout de valeurs manquantes pour completer la derniere sous-liste
     n_missing <- n_new - nrow(results_new)
     if (n_missing > 0) {
       results_new[(nrow(results_new)+1):(n_new),] <- NA
     }
 
-    # Diviser le nouveau tableau de resultats en sous groupes de nbvalmanplot lignes
     results_list <- split(results_new, ceiling(seq_along(results_new$p_value)/nbvalmanplot))
 
-    # Creation d'un manhattan plot pour chaque sous groupe de donnees
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verification de si le sous groupe contient des valeurs manquantes
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -161,7 +153,7 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
         n_sub <- nbvalmanplot
       }
 
-      # Creer le manhattan plot pour les sous groupes
+      # Create Manhattan plot for subgroups
       Manplot <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                         color = ifelse(coefficients > 0, "> 0", "< 0"))) +
         geom_point() +
@@ -204,29 +196,24 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
     cat("The manhattan plot is not shown.\n")
   }
 
-  # Creation du tableau avec les valeurs significatives uniquement
+  # Creation of the Manhattan plot with significant values only
 
   if (manplotsign == TRUE) {
 
-    # Creer un nouveau tableau de resultats avec autant de multiples de nbvalmanplot
     resultssign <- results %>% dplyr::filter(p_value < 0.05)
     n_new_sign <- ceiling(nrow(resultssign) / nbvalmanplot) * nbvalmanplot
     resultssign_new <- resultssign[1:n_new_sign, ]
 
-    # Ajouter des valeurs manquantes pour completer la derniere sous liste
     n_missing_sign <- n_new_sign - nrow(resultssign_new)
     if (n_missing_sign > 0) {
       resultssign_new[(nrow(resultssign_new)+1):(n_new_sign),] <- NA
     }
 
-    # Diviser le nouveau tableau de resultats en sous groupes de 30 lignes
     results_list <- split(resultssign_new, ceiling(seq_along(resultssign_new$p_value)/nbvalmanplot))
 
-    # Creer un manhattan plot pour chaque sous-groupe de donnees
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verification de si le sous-groupe contient des valeurs manquantes
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -234,7 +221,6 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
         n_sub <- nbvalmanplot
       }
 
-      # Creation d'un manhattan plot pour chaque sous-groupe de donnees
       Manplotsign <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                             color = ifelse(coefficients > 0, "> 0", "< 0"))) +
         geom_point() +
@@ -303,37 +289,28 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
 #' @export
 #'
 #' @examples
-#'#' ### Creating a dataframe with random variables
+#' ### Loading the PIMA dataset contained in the mlbench package
 #'
+#' library(mlbench)
+#' data(PimaIndiansDiabetes)
 #'
-#' exposure1 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#' exposure2 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#' exposure3 <- as.factor(sample(c("Exposed", "Not exposed"), size = 400, replace = TRUE))
-#' exposure4 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure5 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure6 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure7 <- as.numeric(sample(0:400, 400, rep = TRUE))
-#' exposure8 <- as.numeric(sample(0:400, 400, rep = TRUE))
-#' exposure9 <- as.numeric(sample(0:0.1, 400, rep = TRUE))
-#' outcome <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
+#' ### Using ELJAlinear to perform EWAS analysis
 #'
-#' data <- data.frame(exposure1,exposure2,exposure3,exposure4,exposure5,
-#'                    exposure6,exposure7,exposure8,exposure9, outcome)
-#'
-#'
-#' ### Launch of the EnvWAS analysis
-#'
-#' ELJAlogistic(var = 'outcome',data = data, var_adjust = c('exposure5'))
+#' ELJAlogistic(var = 'diabetes',data = PimaIndiansDiabetes,manplot = TRUE,
+#' Bonferroni = TRUE,FDR = TRUE, nbvalmanplot = 30, manplotsign = FALSE)
+#' results
 #'
 #'@references
-#'1. Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
-#'2. Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
+#' Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' MLBench · Distributed Machine Learning Benchmark. Available from: https://mlbench.github.io/
+#' Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP Learning Algorithm to Forecast the Onset of Diabetes Mellitus. Proc Annu Symp Comput Appl Med Care. 1988 Nov 9;261–5.
 #'
 #'
 ELJAlogistic <- function(var, var_adjust = NULL, data,
                         manplot = TRUE, nbvalmanplot = 100, Bonferroni = FALSE, FDR = FALSE, manplotsign = FALSE) {
 
-  # Definition de y et x ( x = variable explicative dans la boucle + variable d'ajustements fixe s'il y en a)
+  # Definition of y and x ( x = explanatory variable in the loop + fixed adjustment variable if any and y = health event)
 
   y <- data[, var]
 
@@ -350,7 +327,7 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
   n <- length(x)
 
 
-  # Analyses de regressions pour chaque variable explicative
+  # Regression analyses for each explanatory variable
 
   x_cols <- colnames(x)
   glm_results <- list()
@@ -358,14 +335,14 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
 
   for (col in x_cols) {
     if(col %in% var_adjust) {
-      next # passer à la variable explicative suivante si elle fait partie des variables d'ajustement
+      next # Move on to the next explanatory variable if it is one of the adjustment variables
     }
     fit <- glm(as.formula(paste0(var, " ~ ", x_formula, col)), data = data, family = binomial(link = "logit"))
     summary_fit <- summary(fit)
-    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclure l'intercept
+    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclude the intercept value
 
     for (name in coef_names) {
-      level <- gsub("x\\[.*\\]", " ", name) # Extraire la modalite de la variable explicative
+      level <- gsub("x\\[.*\\]", " ", name) # Extract the explanatory variable modality
       odds <- exp(summary_fit$coefficients[name, 1])
       ci <- exp(suppressMessages(confint(fit, parm = name, level = 0.95)))
       p_value <- summary_fit$coefficients[name, 4]
@@ -384,28 +361,28 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
     }
   }
 
-  # Assemblage des resultats dans un dataframe unique
+  # Assembling results in a single dataframe
 
   results <- do.call(rbind, glm_results)
   results$variable_level <- rownames(results)
   results$variable <- NULL
 
 
-  # Suppression des OR associes aux variables d'ajustement
+  # Deletion of Odd Ratios associated with adjustment variables
 
   if (!is.null(var_adjust)) {
     results <- results[!grepl(paste(var_adjust, collapse="|"), results$variable_level),]
     rownames(results) <- results$level
   }
 
-  # Stockage du tableau des resultats et nettoyage de celui-ci
+  # Storing the results table
 
   results$variable_level <- NULL
   results <<- results
 
   nbvar <- as.numeric(length(results$p_value))
 
-  # Calcul du FDR
+  # FDR calculation
 
   results_test <- results %>% arrange(p_value) %>% mutate(ligne = row_number())
 
@@ -415,16 +392,15 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
 
   FDRcalc <- results_test %>% dplyr::filter(test == TRUE) %>% slice_tail(n = 1) %>% select(q) %>% as.numeric()
 
-  # Traçage des Manhattan plots
+  # Creation of the Manhattan Plot
 
   if (manplot == TRUE) {
 
-    # Creation d'autant de Manhattan plot que de multiple de nbvalmanplot
+    # Creation of as many Manhattan plots as multiples of nbvalmanplot
 
     n_new <- ceiling(nrow(results) / nbvalmanplot) * nbvalmanplot
     results_new <- results[1:n_new, ]
 
-    # Evite l'affichage de NA lorsque le nombre de Manhattan plot n'est pas un mutliple de nbvalmanplot
     n_missing <- n_new - nrow(results_new)
     if (n_missing > 0) {
       results_new[(nrow(results_new)+1):(n_new),] <- NA
@@ -432,11 +408,9 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
 
     results_list <- split(results_new, ceiling(seq_along(results_new$p_value)/nbvalmanplot))
 
-    # Creer un manhattan plot pour chaque sous-groupe de donnees
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verifier si le sous-groupe contient des valeurs manquantes
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -444,7 +418,7 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
         n_sub <- nbvalmanplot
       }
 
-      # Creer le manhattan plot pour le sous-groupe
+      # Create Manhattan plot for subgroups
       Manplot <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                         color = ifelse(odd_ratio > 1, "> 1", "< 1"))) +
         geom_point() +
@@ -489,25 +463,26 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
 
   if (manplotsign == TRUE) {
 
-    # Creer un nouveau tableau de resultats avec les résultats uniquement significatifs
+    # Creation of the Manhattan plot with significant values only
+
     resultssign <- results %>% dplyr::filter(p_value < 0.05)
     n_new_sign <- ceiling(nrow(resultssign) / nbvalmanplot) * nbvalmanplot
     resultssign_new <- resultssign[1:n_new_sign, ]
 
-    # Ajouter des valeurs manquantes pour completer la derniere sous-liste
+
     n_missing_sign <- n_new_sign - nrow(resultssign_new)
     if (n_missing_sign > 0) {
       resultssign_new[(nrow(resultssign_new)+1):(n_new_sign),] <- NA
     }
 
-    # Diviser le nouveau tableau de resultats en sous-groupes de 30 lignes
+
     results_list <- split(resultssign_new, ceiling(seq_along(resultssign_new$p_value)/nbvalmanplot))
 
-    # Creer un manhattan plot pour chaque sous-groupe de donnees
+
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verifier si le sous-groupe contient des valeurs manquantes
+
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -515,7 +490,6 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
         n_sub <- nbvalmanplot
       }
 
-      # Creer le manhattan plot pour le sous-groupe
       Manplotsign <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                             color = ifelse(odd_ratio > 1, "> 1", "< 1"))) +
         geom_point() +
@@ -587,37 +561,29 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
 #' @export
 #'
 #' @examples
-#' ### Creating a dataframe with random variables
+#' ### Loading the PIMA dataset contained in the mlbench package
 #'
+#' library(mlbench)
+#' data(PimaIndiansDiabetes)
 #'
-#' exposure1 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#' exposure2 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-#' exposure3 <- as.factor(sample(c("Exposed", "Not exposed"), size = 400, replace = TRUE))
-#' exposure4 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure5 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure6 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-#' exposure7 <- as.numeric(sample(0:400, 400, rep = TRUE))
-#' exposure8 <- as.numeric(sample(0:400, 400, rep = TRUE))
-#' exposure9 <- as.numeric(sample(0:0.1, 400, rep = TRUE))
-#' outcome <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
+#' ### Using ELJAlinear to perform EWAS analysis
 #'
-#' data <- data.frame(exposure1,exposure2,exposure3,exposure4,exposure5,
-#'                    exposure6,exposure7,exposure8,exposure9, outcome)
-#'
-#'
-#' ### Launch of the EnvWAS analysis
-#'
-#' ELJAglm(var = 'outcome',data = data, var_adjust = c('exposure5'))
+#' ELJAglm(var = 'diabetes',data = PimaIndiansDiabetes,
+#' family = binomial(link = "logit"), manplot = TRUE, Bonferroni = TRUE,
+#' FDR = TRUE, nbvalmanplot = 30, manplotsign = FALSE)
+#' results
 #'
 #'@references
-#'1. Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
-#'2. Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
+#' Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+#' MLBench · Distributed Machine Learning Benchmark. Available from: https://mlbench.github.io/
+#' Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP Learning Algorithm to Forecast the Onset of Diabetes Mellitus. Proc Annu Symp Comput Appl Med Care. 1988 Nov 9;261–5.
 #'
 #'
 ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), data,
                         manplot = TRUE, nbvalmanplot = 100, Bonferroni = FALSE, FDR = FALSE, manplotsign = FALSE) {
 
-  # Definition de y et x ( x = variable explicative dans la boucle + variable d'ajustements fixe s'il y en a)
+  # Definition of y and x ( x = explanatory variable in the loop + fixed adjustment variable if any and y = health event)
 
   y <- data[, var]
 
@@ -634,7 +600,7 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
   n <- length(x)
 
 
-  # Analyses de regressions pour chaque variable explicative
+  # Regression analyses for each explanatory variable
 
   x_cols <- colnames(x)
   glm_results <- list()
@@ -642,14 +608,14 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
 
   for (col in x_cols) {
     if(col %in% var_adjust) {
-      next # passer à la variable explicative suivante si elle fait partie des variables d'ajustement
+      next # Move on to the next explanatory variable if it is one of the adjustment variables
     }
     fit <- glm(as.formula(paste0(var, " ~ ", x_formula, col)), data = data, family = family)
     summary_fit <- summary(fit)
-    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclure l'intercept
+    coef_names <- rownames(summary_fit$coefficients)[-1] # Exclude the intercept value
 
     for (name in coef_names) {
-      level <- gsub("x\\[.*\\]", " ", name) # Extraire la modalite de la variable explicative
+      level <- gsub("x\\[.*\\]", " ", name) # Extract the explanatory variable modality
       coef <- summary_fit$coefficients[name, 1]
       ci <- suppressMessages(confint(fit, parm = name, level = 0.95))
       p_value <- summary_fit$coefficients[name, 4]
@@ -668,28 +634,28 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
     }
   }
 
-  # Assemblage des resultats dans un dataframe unique
+  # Assembling results in a single dataframe
 
   results <- do.call(rbind, glm_results)
   results$variable_level <- rownames(results)
   results$variable <- NULL
 
 
-  # Suppression des coefficients associes aux variables d'ajustement
+  # Deletion of coefficients associated with adjustment variables
 
   if (!is.null(var_adjust)) {
     results <- results[!grepl(paste(var_adjust, collapse="|"), results$variable_level),]
     rownames(results) <- results$level
   }
 
-  # Stockage du tableau des resultats et nettoyage de celui-ci
+  # Storing the results table
 
   results$variable_level <- NULL
   results <<- results
 
   nbvar <- as.numeric(length(results$p_value))
 
-  # Calcul du FDR
+  # FDR calculation
 
   results_test <- results %>% arrange(p_value) %>% mutate(ligne = row_number())
 
@@ -699,16 +665,15 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
 
   FDRcalc <- results_test %>% dplyr::filter(test == TRUE) %>% slice_tail(n = 1) %>% select(q) %>% as.numeric()
 
-  # Traçage des Manhattan plots
+  # Creation of the Manhattan Plot
 
   if (manplot == TRUE) {
 
-    # Creation d'autant de Manhattan plot que de multiple de nbvalmanplot
+    # Creation of as many Manhattan plots as multiples of nbvalmanplot
 
     n_new <- ceiling(nrow(results) / nbvalmanplot) * nbvalmanplot
     results_new <- results[1:n_new, ]
 
-    # Evite l'affichage de NA lorsque le nombre de Manhattan plot n'est pas un mutliple de nbvalmanplot
     n_missing <- n_new - nrow(results_new)
     if (n_missing > 0) {
       results_new[(nrow(results_new)+1):(n_new),] <- NA
@@ -716,11 +681,9 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
 
     results_list <- split(results_new, ceiling(seq_along(results_new$p_value)/nbvalmanplot))
 
-    # Creer un manhattan plot pour chaque sous-groupe de donnees
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verifier si le sous-groupe contient des valeurs manquantes
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -728,7 +691,7 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
         n_sub <- nbvalmanplot
       }
 
-      # Creer le manhattan plot pour le sous-groupe
+      # Create Manhattan plot for subgroups
       Manplot <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                         color = ifelse(coefficients > 0, "> 0", "< 0"))) +
         geom_point() +
@@ -773,25 +736,22 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
 
   if (manplotsign == TRUE) {
 
-    # Creer un nouveau tableau de resultats avec autant de multiples de 30
+    # Creation of the Manhattan plot with significant values only
+
     resultssign <- results %>% dplyr::filter(p_value < 0.05)
     n_new_sign <- ceiling(nrow(resultssign) / nbvalmanplot) * nbvalmanplot
     resultssign_new <- resultssign[1:n_new_sign, ]
 
-    # Ajouter des valeurs manquantes pour completer la derniere sous-liste
     n_missing_sign <- n_new_sign - nrow(resultssign_new)
     if (n_missing_sign > 0) {
       resultssign_new[(nrow(resultssign_new)+1):(n_new_sign),] <- NA
     }
 
-    # Diviser le nouveau tableau de resultats en sous-groupes de 30 lignes
     results_list <- split(resultssign_new, ceiling(seq_along(resultssign_new$p_value)/nbvalmanplot))
 
-    # Creer un manhattan plot pour chaque sous-groupe de donnees
     for (i in seq_along(results_list)) {
       sub_results <- results_list[[i]]
 
-      # Verifier si le sous-groupe contient des valeurs manquantes
       if (any(is.na(sub_results$p_value))) {
         sub_results <- na.omit(sub_results)
         n_sub <- nrow(sub_results)
@@ -799,7 +759,6 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
         n_sub <- nbvalmanplot
       }
 
-      # Creer le manhattan plot pour le sous-groupe
       Manplotsign <- ggplot(sub_results, aes(x = level, y = -log10(p_value),
                                             color = ifelse(coefficients > 0, "> 0", "< 0"))) +
         geom_point() +

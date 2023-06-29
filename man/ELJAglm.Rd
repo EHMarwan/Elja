@@ -42,32 +42,22 @@ A Dataframe with results for each variable of the model.
 A tool for Environment-Wide Association Studies (EnvWAS / EWAS) which are repeated analysis. This function is espacially for generalized linear models 'glm' and allows the addition of adjustment variables.
 }
 \examples{
-### Creating a dataframe with random variables
+### Loading the PIMA dataset contained in the mlbench package
 
+library(mlbench)
+data(PimaIndiansDiabetes)
 
-exposure1 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-exposure2 <- as.factor(sample(c("Always", "Often","Never"), size = 400, replace = TRUE))
-exposure3 <- as.factor(sample(c("Exposed", "Not exposed"), size = 400, replace = TRUE))
-exposure4 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-exposure5 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-exposure6 <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
-exposure7 <- as.numeric(sample(0:400, 400, rep = TRUE))
-exposure8 <- as.numeric(sample(0:400, 400, rep = TRUE))
-exposure9 <- as.numeric(sample(0:0.1, 400, rep = TRUE))
-outcome <- as.factor(sample(c("Yes", "No"), size = 400, replace = TRUE))
+### Using ELJAlinear to perform EWAS analysis
 
-data <- data.frame(exposure1,exposure2,exposure3,exposure4,exposure5,
-                   exposure6,exposure7,exposure8,exposure9, outcome)
-
-
-### Launch of the EnvWAS analysis
-
-ELJAglm(var = 'outcome',data = data, var_adjust = c('exposure5'))
+ELJAglm(var = 'diabetes',data = PimaIndiansDiabetes,
+family = binomial(link = "logit"), manplot = TRUE, Bonferroni = TRUE,
+FDR = TRUE, nbvalmanplot = 30, manplotsign = FALSE)
+results
 
 }
 \references{
-\enumerate{
-\item Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
-\item Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
-}
+Dunn OJ. Multiple Comparisons Among Means. Journal of the American Statistical Association. 1961;56(293):52‑64.
+Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society: Series B (Methodological). 1995;57(1):289‑300.
+MLBench · Distributed Machine Learning Benchmark. Available from: https://mlbench.github.io/
+Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP Learning Algorithm to Forecast the Onset of Diabetes Mellitus. Proc Annu Symp Comput Appl Med Care. 1988 Nov 9;261–5.
 }

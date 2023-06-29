@@ -1,5 +1,7 @@
 ---
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
+title : READ ME
+author : Marwan EL HOMSI
 ---
 
 
@@ -19,8 +21,8 @@ Interval and the associated p-value
 
 In addition, two types of Manhattan plot can also be displayed, both with a 
 visual representation of the alpha threshold at 0.05 and the corrected alpha 
-threshold according to the Bonferroni method (3) and the Benjamini-Hochberg 
-False Discovery Rate (FDR) method (4) :
+threshold according to the Bonferroni method (1) and the Benjamini-Hochberg 
+False Discovery Rate (FDR) method (2) :
 
 * A Manhattan plot representing all the variables of the EWAS analysis
 * A Manhattan plot representing only the significant results (p<0.05).
@@ -41,7 +43,7 @@ install_github("EHMarwan/Elja")
 
 ## Usage
 
-```{r, message = FALSE}
+```{r, message = FALSE, eval=FALSE}
 
 library(Elja)
 
@@ -60,4 +62,12 @@ ELJAlogistic(var, var_adjust = NULL, data, manplot = TRUE, nbvalmanplot = 100,
 ## Help
 
 If you encounter a bug or have any question, please submit an issue with a 
-reproducible example to [GitHub](https://github.com/EHMarwan/Elja/issues). 
+reproducible example to [GitHub] <https://github.com/EHMarwan/Elja/issues>. 
+
+### References
+
+* Dunn OJ. Multiple Comparisons Among Means. Journal of the American 
+Statistical Association. 1961;56(293):52‑64.
+* Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A Practical 
+and Powerful Approach to Multiple Testing. Journal of the Royal Statistical 
+Society: Series B (Methodological). 1995;57(1):289‑300.

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Marwan EL HOMSI" />
+
+
+<title>Introduction to the Elja package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to the Elja package</h1>
+<h4 class="author">Marwan EL HOMSI</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Elja)</span></code></pre></div>
+<p>Environment-Wide Association Studies (EWAS) are the study of the
+association between a health event and several exposures one after the
+other. With this package, it is possible to carry out an EWAS analysis
+in the simplest way and to display easily interpretable results in the
+output.</p>
+<p>To do this, you must first define several points:</p>
+<ul>
+<li><p>Make your dataset prepared</p></li>
+<li><p>Determine which health event you want to study</p></li>
+<li><p>Launch the program</p></li>
+</ul>
+<p>The Elja package works step by step to perform an EWAS analysis:</p>
+<ul>
+<li><p>It structures the dataset you have provided</p></li>
+<li><p>It runs multiple models on all the exposures according to the
+type of model chosen for the type of outcome (continuous, binary
+categorical etc.)</p></li>
+<li><p>It results in a data frame including for each tested exposure
+(and all associated modalities): the value of the estimator (odd ratio
+or coefficients) as well as its 95% confidence interval and the
+associated p-value and the number of values taken into account in the
+model and the AIC of the model.</p></li>
+<li><p>It can also display two types of Manhattan plot both with visual
+indicator of the alpha threshold at 0.05 and of the alpha threshold
+corrected according to the Bonferroni method and the False Discovery
+Rate (FDR) of Benjamini-Hochberg. The first one, representing all the
+variables of the EWAS analysis. The second one, only for the significant
+values.</p></li>
+</ul>
+<p>This document introduces the basic use of this package in an EWAS
+analysis.</p>
+<div id="data-pimaindiansdiabetes" class="section level2">
+<h2>Data: PimaIndiansDiabetes</h2>
+<p>In order to show in a simple way the use of the Elja package, we will
+use the PIMA dataset. This dataset is present in the package mlbench (<a href="https://mlbench.github.io/" class="uri">https://mlbench.github.io/</a>).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlbench)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(PimaIndiansDiabetes)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(PimaIndiansDiabetes)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pregnant glucose pressure triceps insulin mass pedigree age diabetes</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        6     148       72      35       0 33.6    0.627  50      pos</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        1      85       66      29       0 26.6    0.351  31      neg</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        8     183       64       0       0 23.3    0.672  32      pos</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4        1      89       66      23      94 28.1    0.167  21      neg</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5        0     137       40      35     168 43.1    2.288  33      pos</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        5     116       74       0       0 25.6    0.201  30      neg</span></span></code></pre></div>
+<p>This dataset containing a health event (diabetes) will allow us to to
+illustrate the functioning of the Elja package.</p>
+</div>
+<div id="preparation-of-the-data-set" class="section level2">
+<h2>Preparation of the data set</h2>
+<p>Before performing the function, we have to make sure that the dataset
+is well structured.</p>
+<p>To do so, we have to check 2 elements:</p>
+<ul>
+<li><p>The health event (outcome) must be in the same dataframe as all
+the exposures: this will avoid making a model where we will include
+other outcomes.</p></li>
+<li><p>The variables must be classified in the right way: for this, use
+‘str()’.</p></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(PimaIndiansDiabetes)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    768 obs. of  9 variables:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ pregnant: num  6 1 8 1 0 5 3 10 2 8 ...</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ glucose : num  148 85 183 89 137 116 78 115 197 125 ...</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ pressure: num  72 66 64 66 40 74 50 0 70 96 ...</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ triceps : num  35 29 0 23 35 0 32 0 45 0 ...</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ insulin : num  0 0 0 94 168 0 88 0 543 0 ...</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ mass    : num  33.6 26.6 23.3 28.1 43.1 25.6 31 35.3 30.5 0 ...</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ pedigree: num  0.627 0.351 0.672 0.167 2.288 ...</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ age     : num  50 31 32 21 33 30 26 29 53 54 ...</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ diabetes: Factor w/ 2 levels &quot;neg&quot;,&quot;pos&quot;: 2 1 2 1 2 1 2 1 2 2 ...</span></span></code></pre></div>
+<p>Diabetes, which is our target health event, stands alone with
+exposures. In addition, the variables all have the correct class
+associated.</p>
+<div id="determine-the-type-of-model-you-want-to-use" class="section level3">
+<h3>Determine the type of model you want to use</h3>
+<p>According to the class of the outcome, one model will be preferred to
+another. It is therefore necessary to choose the right model for the
+type of variable chosen as the health event.</p>
+<p>We have seen previously that our health event is binary categorical:
+Diabetes (Yes/No).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(PimaIndiansDiabetes<span class="sc">$</span>diabetes)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Factor w/ 2 levels &quot;neg&quot;,&quot;pos&quot;: 2 1 2 1 2 1 2 1 2 2 ...</span></span></code></pre></div>
+<p>We can therefore use a logistic regression model.</p>
+</div>
+<div id="use-of-the-eljalogistic-function" class="section level3">
+<h3>Use of the ELJAlogistic function</h3>
+<p>The approach for the logistic regression is similar for the models
+linear models with ELJAlinear function and for Generalized Linear Models
+with ELJAglm function.</p>
+<p>The dataset being prepared and the type of model chosen, we can
+proceed to the analysis.</p>
+<p>To do so, the following information are needed:</p>
+<ul>
+<li><p>var: Outcome / health event; it must be categorical for a
+logistic regression model</p></li>
+<li><p>data: Dataframe that contains the outcome and all the exposures
+to be tested</p></li>
+</ul>
+<p>Other information can be added to the output of the function:</p>
+<ul>
+<li><p>manplot: Indicates if it is desired to display a Manhattan plot
+of the results in the output of the function</p></li>
+<li><p>nbvalmanplot: Indicates the number of values to display in the
+Manhattan plot (in order not to overload the graphs)</p></li>
+<li><p>Bonferroni: Indicates if we want to display the Bonferroni
+threshold on the Manhattan plot</p></li>
+<li><p>FDR : Indicates if you want to display the False Discovery Rate
+threshold according to the Benjamini-Hochberg method on the Manhattan
+plot</p></li>
+<li><p>manplotsign : Indicates if you want to display a Manhattan plot
+containing only significant only the significant values with a p-value
+&gt; 0.05.</p></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ELJAlogistic</span>(<span class="at">var =</span> <span class="st">&#39;diabetes&#39;</span>,<span class="at">data =</span> PimaIndiansDiabetes,<span class="at">manplot =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">Bonferroni =</span> <span class="cn">TRUE</span>,<span class="at">FDR =</span> <span class="cn">TRUE</span>, <span class="at">nbvalmanplot =</span> <span class="dv">30</span>, <span class="at">manplotsign =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<pre><code>#&gt; The manhattan plot (manplotsign) is not shown.
+results
+#&gt;                      level odd_ratio    ci_low  ci_high      p_value   n
+#&gt; pregnant_pregnant pregnant  1.147008 1.0970869 1.200315 2.147445e-09 768
+#&gt; glucose_glucose    glucose  1.038599 1.0321816 1.045439 2.378098e-31 768
+#&gt; pressure_pressure pressure  1.007452 0.9994922 1.015902 7.299362e-02 768
+#&gt; triceps_triceps    triceps  1.009911 1.0005344 1.019455 3.881576e-02 768
+#&gt; insulin_insulin    insulin  1.002301 1.0010311 1.003607 4.353455e-04 768
+#&gt; mass_mass             mass  1.098044 1.0730012 1.124942 8.449577e-15 768
+#&gt; pedigree_pedigree pedigree  2.953073 1.8799770 4.713627 3.702926e-06 768
+#&gt; age_age                age  1.042922 1.0296867 1.056659 1.773155e-10 768
+#&gt;                        AIC
+#&gt; pregnant_pregnant 960.2099
+#&gt; glucose_glucose   812.7196
+#&gt; pressure_pressure 994.1276
+#&gt; triceps_triceps   993.1890
+#&gt; insulin_insulin   984.8104
+#&gt; mass_mass         924.7142
+#&gt; pedigree_pedigree 974.8609
+#&gt; age_age           954.7203</code></pre>
+<p>We observe a Manhattan plot showing the results of the EWAS analysis
+and a dataframe showing the more detailed results.</p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<ul>
+<li>Dunn OJ. Multiple Comparisons Among Means. Journal of the American
+Statistical Association. 1961;56(293):52‑64.</li>
+<li>Benjamini Y, Hochberg Y. Controlling the False Discovery Rate: A
+Practical and Powerful Approach to Multiple Testing. Journal of the
+Royal Statistical Society: Series B (Methodological).
+1995;57(1):289‑300.</li>
+<li>MLBench · Distributed Machine Learning Benchmark. Available from: <a href="https://mlbench.github.io/" class="uri">https://mlbench.github.io/</a></li>
+<li>Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using
+the ADAP Learning Algorithm to Forecast the Onset of Diabetes Mellitus.
+Proc Annu Symp Comput Appl Med Care. 1988 Nov 9;261–5.</li>
+</ul>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
