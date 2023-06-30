@@ -36,7 +36,7 @@ ELJAlinear(
 A Dataframe with results for each variable of the model.
 }
 \description{
-A tool for Environment-Wide Association Studies (EnvWAS / EWAS) namely repeated analyses allowing to estimate the relationships between several environmental factors and a health events. This function   is especially for linear regressions and allows the addition of adjustment variables.
+A tool for Environment-Wide Association Studies (EnvWAS / EWAS) namely repeated analyses allowing to estimate the relationships between several environmental factors and a health events. This function is especially for linear regressions and allows the addition of adjustment variables.
 }
 \examples{
 ### Loading the PIMA dataset contained in the mlbench package

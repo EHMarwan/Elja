@@ -11,10 +11,10 @@ Authors@R: c(
     "Department of Allergic and Respiratory Diseases, Montpellier University Hospital, Montpellier.")))
     )
 Maintainer: Marwan El Homsi <marwan.el-homsi@inserm.fr>
-Description: The Elja package is a tool for Environment-Wide Association
-    Studies (EnvWAS / EWAS) which are repeated analysis. It includes three 
-    functions. One function for linear regression, a second for logistic
-    regression and a last one for generalized linear models.
+Description: Tool for Environment-Wide Association Studies (EnvWAS / EWAS) 
+    which are repeated analysis. It includes three functions. One function for
+    linear regression, a second for logistic regression and a last one for
+    generalized linear models.
 Depends: R (>= 4.3)
 Imports: 
     stats, devtools, dplyr, ggplot2, MASS

@@ -4,7 +4,7 @@ utils::globalVariables(c("odd_ratio", "coefficients"))
 #' Linear regression for EnvWAS/EWAS analysis
 #'
 #' @description
-#' A tool for Environment-Wide Association Studies (EnvWAS / EWAS) namely repeated analyses allowing to estimate the relationships between several environmental factors and a health events. This function   is especially for linear regressions and allows the addition of adjustment variables.
+#' A tool for Environment-Wide Association Studies (EnvWAS / EWAS) namely repeated analyses allowing to estimate the relationships between several environmental factors and a health events. This function is especially for linear regressions and allows the addition of adjustment variables.
 #'
 #'
 #' @param var A categorical and binary variable. It is generally your outcome.
@@ -193,7 +193,7 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
     }
 
   } else {
-    cat("The manhattan plot is not shown.\n")
+    message("The manhattan plot is not shown.\n")
   }
 
   # Creation of the Manhattan plot with significant values only
@@ -260,7 +260,7 @@ ELJAlinear <- function(var, var_adjust = NULL, data,
     }
 
   } else {
-    cat("The manhattan plot (manplotsign) is not shown.\n")
+    message("The manhattan plot (manplotsign) is not shown.\n")
   }
 }
 
@@ -458,7 +458,7 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
     }
 
   } else {
-    cat("The manhattan plot is not shown.\n")
+    message("The manhattan plot is not shown.\n")
   }
 
   if (manplotsign == TRUE) {
@@ -530,7 +530,7 @@ ELJAlogistic <- function(var, var_adjust = NULL, data,
     }
 
   } else {
-    cat("The manhattan plot (manplotsign) is not shown.\n")
+    message("The manhattan plot (manplotsign) is not shown.\n")
   }
 }
 
@@ -731,7 +731,7 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
     }
 
   } else {
-    cat("The manhattan plot is not shown.\n")
+    message("The manhattan plot is not shown.\n")
   }
 
   if (manplotsign == TRUE) {
@@ -799,7 +799,7 @@ ELJAglm <- function(var, var_adjust = NULL, family = binomial(link = "logit"), d
     }
 
   } else {
-    cat("The manhattan plot (manplotsign) is not shown.\n")
+    message("The manhattan plot (manplotsign) is not shown.\n")
   }
 }
 
